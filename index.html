@@ -1,8 +1,8 @@
-console.log("FACE API LOADED");
 <video id="video" width="360" height="270" autoplay muted></video>
 <div id="status">Memuat model...</div>
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <script>
+console.log("FACE API LOADED");
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwCdu8ZYh8yGJecbwmuscOgzFrwdi_k1cFhSAK3LFi03g-Uk-6UXby4-TEFpvevySK-/exec";
 
 // Load camera
@@ -17,11 +17,16 @@ Promise.all([
 ]).then(startRecognition);
 
 async function loadLabeledImages(){
-  const labels = ['GemaMahardhika','RinaSaputri'];
+  
+  const labels = ['GemaMahardhika'];
   return Promise.all(labels.map(async label=>{
-    const img = await faceapi.fetchImage(`./faces/${label}.jpeg`);
+    console.log("LOAD IMAGE :", label);
+	const img = await faceapi.fetchImage(`./faces/${label}.jpeg`);
     const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-    return new faceapi.LabeledFaceDescriptors(label,[detections.descriptor]);
+    if(!detections){
+  console.log("WAJAH TIDAK TERDETEKSI :", label);
+  return null;
+	return new faceapi.LabeledFaceDescriptors(label,[detections.descriptor]);
   }));
 }
 
@@ -29,7 +34,8 @@ async function startRecognition(){
 
   document.getElementById('status').innerText='Model berhasil dimuat';
 
-  const labeledDescriptors = await loadLabeledImages();
+  const labeledDescriptors =
+  (await loadLabeledImages()).filter(x=>x);
 
   document.getElementById('status').innerText='Wajah referensi berhasil dimuat';
 
