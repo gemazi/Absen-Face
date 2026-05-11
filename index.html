@@ -105,7 +105,7 @@ async function startRecognition(){
     (await loadLabeledImages()).filter(x => x);
 
   const faceMatcher =
-    new faceapi.FaceMatcher(labeledDescriptors,0.6);
+    new faceapi.FaceMatcher(labeledDescriptors,0.8);
 
   document.getElementById('status').innerText =
     'Face recognition aktif';
