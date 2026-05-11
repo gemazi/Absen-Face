@@ -18,7 +18,7 @@ Promise.all([
 async function loadLabeledImages(){
   const labels = ['GemaMahardhika','RinaSaputri'];
   return Promise.all(labels.map(async label=>{
-    const img = await faceapi.fetchImage(`/faces/${label}.jpg`);
+    const img = await faceapi.fetchImage(`/faces/${label}.jpeg`);
     const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
     return new faceapi.LabeledFaceDescriptors(label,[detections.descriptor]);
   }));
