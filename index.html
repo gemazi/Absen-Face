@@ -61,16 +61,18 @@ async function loadLabeledImages(){
     labels.map(async label => {
 
       const img = await faceapi.fetchImage(
-        `./faces/${label}.jpg`
+        `./faces/${label}.png`
       );
 
-      const detections = await faceapi
+      console.log(img);
+
+		const detections = await faceapi
 
         .detectSingleFace(
           img,
           new faceapi.TinyFaceDetectorOptions()
         )
-
+console.log(detections);
         .withFaceLandmarks()
         .withFaceDescriptor();
 
