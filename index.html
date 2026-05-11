@@ -70,7 +70,10 @@ async function loadLabeledImages(){
 
         .detectSingleFace(
           img,
-          new faceapi.TinyFaceDetectorOptions()
+          new faceapi.TinyFaceDetectorOptions({
+  inputSize: 320,
+  scoreThreshold: 0.3
+})
         )
 
         .withFaceLandmarks()
@@ -129,13 +132,17 @@ async function startRecognition(){
       const detections = await faceapi
 
         .detectAllFaces(
-          video,
-          new faceapi.TinyFaceDetectorOptions()
+  video,
+  new faceapi.TinyFaceDetectorOptions({
+    inputSize: 416,
+    scoreThreshold: 0.1
+  })
+)
         )
 
         .withFaceLandmarks()
         .withFaceDescriptors();
-
+console.log("JUMLAH WAJAH:", detections.length);
       const resizedDetections =
         faceapi.resizeResults(
           detections,
