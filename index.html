@@ -61,7 +61,7 @@ async function loadLabeledImages(){
     labels.map(async label => {
 
       const img = await faceapi.fetchImage(
-        `./faces/${label}.jpeg`
+        `./faces/${label}.jpg`
       );
 
       const detections = await faceapi
