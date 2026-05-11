@@ -72,10 +72,10 @@ async function loadLabeledImages(){
           img,
           new faceapi.TinyFaceDetectorOptions()
         )
-console.log(detections);
+
         .withFaceLandmarks()
         .withFaceDescriptor();
-
+console.log(detections);
       if(!detections){
 
         console.log("Wajah tidak ditemukan :", label);
