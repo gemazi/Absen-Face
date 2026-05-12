@@ -38,8 +38,7 @@ async function loadLabeledImages() {
 
   const labels = [
     'gema',
-    'Budi',
-    'Citra'
+    'elisa'
   ];
 
   return Promise.all(
