@@ -37,7 +37,7 @@ async function loadModels() {
 async function loadLabeledImages() {
 
   const labels = [
-    'Gema',
+    'gema',
     'Budi',
     'Citra'
   ];
