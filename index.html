@@ -1,250 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Absen Face Recognition</title>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absen Piket Face Recognition</title>
 
+<link rel="stylesheet" href="style.css">
+
+<script defer src="face-api.min.js"></script>
+<script defer src="script.js"></script>
+</head>
 <body>
 
-<video id="video" width="640" height="480" autoplay muted></video>
+<div class="container">
+<h1>ABSEN PIKET MALAM</h1>
 
-<div id="status">Memuat model...</div>
+<video id="video" autoplay muted></video>
 
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<canvas id="canvas"></canvas>
 
-<script>
+<div id="status">Memuat model AI...</div>
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwCdu8ZYh8yGJecbwmuscOgzFrwdi_k1cFhSAK3LFi03g-Uk-6UXby4-TEFpvevySK-/exec";
+<button id="btnAbsen">ABSEN SEKARANG</button>
 
-const video = document.getElementById('video');
-
-let sudahAbsen = false;
-
-// AKTIFKAN KAMERA
-navigator.mediaDevices.getUserMedia({
-  video:{
-    width:640,
-    height:480
-  }
-})
-
-.then(stream => {
-
-  video.srcObject = stream;
-
-  console.log("KAMERA AKTIF");
-
-})
-
-.catch(err => {
-
-  console.log(err);
-
-  document.getElementById('status').innerText =
-    'Kamera gagal diakses';
-
-});
-
-// LOAD MODEL
-Promise.all([
-
-  faceapi.nets.tinyFaceDetector.loadFromUri('./models'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('./models')
-
-])
-
-.then(startRecognition);
-
-// LOAD FOTO REFERENSI
-async function loadLabeledImages(){
-
-  const labels = ['gema'];
-
-  return Promise.all(
-
-    labels.map(async label => {
-
-      const img = await faceapi.fetchImage(
-        `./faces/${label}.png`
-      );
-
-     // console.log(img);
-
-		const detections = await faceapi
-
-        .detectSingleFace(
-          img,
-          new faceapi.TinyFaceDetectorOptions({
-  inputSize: 320,
-  scoreThreshold: 0.3
-})
-        )
-
-        .withFaceLandmarks()
-        .withFaceDescriptor();
-//console.log(detections);
-      if(!detections){
-
-        console.log("Wajah tidak ditemukan :", label);
-
-        return null;
-
-      }
-
-      return new faceapi.LabeledFaceDescriptors(
-        label,
-        [detections.descriptor]
-      );
-
-    })
-
-  );
-
-}
-
-// START RECOGNITION
-async function startRecognition(){
-
-  document.getElementById('status').innerText =
-    'Model berhasil dimuat';
-
-  const labeledDescriptors =
-    (await loadLabeledImages()).filter(x => x);
-
-  const faceMatcher =
-    new faceapi.FaceMatcher(labeledDescriptors,0.8);
-
-  document.getElementById('status').innerText =
-    'Face recognition aktif';
-
-  video.addEventListener('play', () => {
-
-    const canvas =
-      faceapi.createCanvasFromMedia(video);
-
-    document.body.append(canvas);
-
-    const displaySize = {
-      width: video.width,
-      height: video.height
-    };
-
-    faceapi.matchDimensions(canvas, displaySize);
-
-    setInterval(async () => {
-
-      const detections = await faceapi
-
-        .detectAllFaces(
-  video,
-  new faceapi.TinyFaceDetectorOptions({
-    inputSize: 416,
-    scoreThreshold: 0.1
-  })
-
-        )
-
-        .withFaceLandmarks()
-        .withFaceDescriptors();
-console.log("JUMLAH WAJAH:", detections.length);
-      const resizedDetections =
-        faceapi.resizeResults(
-          detections,
-          displaySize
-        );
-
-      canvas.getContext('2d')
-        .clearRect(0,0,canvas.width,canvas.height);
-
-      faceapi.draw.drawDetections(
-        canvas,
-        resizedDetections
-      );
-
-      for(const det of resizedDetections){
-
-        const bestMatch =
-          faceMatcher.findBestMatch(det.descriptor);
-
-        if(bestMatch.label !== 'unknown'){
-
-          document.getElementById('status').innerText =
-            `Wajah dikenali : ${bestMatch.label}`;
-
-          if(sudahAbsen) return;
-
-          sudahAbsen = true;
-
-          // GPS
-          const lokasi =
-            await new Promise(resolve => {
-
-              navigator.geolocation.getCurrentPosition(
-
-                pos => {
-
-                  resolve({
-                    latitude: pos.coords.latitude,
-                    longitude: pos.coords.longitude
-                  });
-
-                },
-
-                err => {
-
-                  resolve({
-                    latitude:'',
-                    longitude:''
-                  });
-
-                }
-
-              );
-
-            });
-
-          // FOTO
-          const canvasFoto =
-            document.createElement('canvas');
-
-          canvasFoto.width = video.videoWidth;
-          canvasFoto.height = video.videoHeight;
-
-          canvasFoto
-            .getContext('2d')
-            .drawImage(video,0,0);
-
-          const foto =
-            canvasFoto.toDataURL('image/jpg');
-
-          // KIRIM
-          fetch(URL_SCRIPT,{
-
-            method:'POST',
-
-            body:JSON.stringify({
-
-              nama: bestMatch.label,
-              latitude: lokasi.latitude,
-              longitude: lokasi.longitude,
-              foto: foto
-
-            })
-
-          });
-
-        }
-
-      }
-
-    },3000);
-
-  });
-
-}
-
-</script>
+<div id="hasil"></div>
+</div>
 
 </body>
 </html>
